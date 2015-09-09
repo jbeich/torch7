@@ -10,6 +10,18 @@
 #include <time.h>
 #include <string.h>
 
+#if defined(__FreeBSD__)
+#include <osreldate.h>
+#if __FreeBSD_version > 1000036
+/* Revert isnan() to the version before r253215 */
+#undef	isnan
+#define	isnan(x)						\
+    ((sizeof (x) == sizeof (float)) ? __inline_isnanf(x)	\
+    : (sizeof (x) == sizeof (double)) ? __inline_isnan(x)	\
+    : __inline_isnanl(x))
+#endif /* __FreeBSD_version */
+#endif /* __FreeBSD__ */
+
 #cmakedefine USE_BLAS
 #cmakedefine USE_LAPACK
 #cmakedefine BLAS_IS_ACCELERATE
