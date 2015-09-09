@@ -5,10 +5,13 @@
 #define __thread
 #endif
 
-#if (defined(__unix) || defined(_WIN32))
-#include <malloc.h>
+#if (defined(__GLIBC__) || defined(_WIN32))
+#include <malloc.h>          /* malloc_usable_size, _msize */
+#elif defined(__FreeBSD__)
+/* jemalloc API */
+#include <malloc_np.h>       /* malloc_usable_size */
 #elif defined(__APPLE__)
-#include <malloc/malloc.h>
+#include <malloc/malloc.h>   /* malloc_size */
 #endif
 
 /* Torch Error Handling */
@@ -125,7 +128,7 @@ void THSetGCHandler( void (*torchGCFunction_)(void *data), void *data )
 }
 
 static long getAllocSize(void *ptr) {
-#if defined(__unix)
+#if defined(__GLIBC__) || defined(__FreeBSD__)
   return malloc_usable_size(ptr);
 #elif defined(__APPLE__)
   return malloc_size(ptr);
